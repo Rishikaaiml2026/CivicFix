@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicFix – Municipal Staff & Admin Portal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Custom Theme CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- ==================== STAFF TOP NAVBAR ==================== -->
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Badge -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <span class="text-lg font-black tracking-tight">CivicFix</span>
+        </a>
+        <span class="text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+          Staff Dashboard
+        </span>
+      </div>
+
+      <!-- Right Nav: User Profile & Actions -->
+      <div class="flex items-center gap-4 text-xs">
+        <a href="index.html" class="text-slate-300 hover:text-white flex items-center gap-1 font-medium transition">
+          <i class="fa-solid fa-arrow-left text-[10px]"></i> Public Portal
+        </a>
+        <a href="analytics.html" class="text-slate-300 hover:text-white flex items-center gap-1 font-medium transition">
+          <i class="fa-solid fa-chart-pie text-[10px]"></i> Analytics
+        </a>
+
+        <!-- Current User Info -->
+        <div class="hidden sm:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+          <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span id="staffUserBadge" class="font-bold text-slate-200">Municipal Officer</span>
+              <span id="staffUserRole" class="text-[9px] uppercase px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-bold">STAFF</span>
+            </div>
+            <p id="staffDeptBadge" class="text-[10px] text-slate-400">Roads & Bridges Department</p>
+          </div>
+        </div>
+
+        <!-- Logout Button -->
+        <button id="staffLogoutBtn" class="bg-red-600/80 hover:bg-red-600 text-white font-semibold px-3 py-1.5 rounded-lg transition text-xs">
+          <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN DASHBOARD CONTENT ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    
+    <!-- Top Welcome Banner -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Municipal Issue Operations Center</h1>
+        <p class="text-xs text-slate-500 mt-0.5">Review citizen complaints, inspect photos, assign field crews, and record verified resolutions.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="staffRefreshBtn" class="bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg border border-slate-200 shadow-sm transition flex items-center gap-1.5">
+          <i class="fa-solid fa-rotate text-blue-600"></i> Refresh Records
+        </button>
+      </div>
+    </div>
+
+    <!-- 5 KPI Metrics Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      
+      <!-- Total -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider">Total Issues</span>
+          <i class="fa-solid fa-inbox text-blue-600"></i>
+        </div>
+        <h3 id="mTotal" class="text-2xl font-extrabold text-slate-900">--</h3>
+        <p class="text-[10px] text-slate-400 mt-1">All registered complaints</p>
+      </div>
+
+      <!-- Pending -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Pending Review</span>
+          <i class="fa-solid fa-clock text-amber-500"></i>
+        </div>
+        <h3 id="mPending" class="text-2xl font-extrabold text-amber-600">--</h3>
+        <p class="text-[10px] text-slate-400 mt-1">Awaiting triage & routing</p>
+      </div>
+
+      <!-- In Progress -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-sky-700">In Progress</span>
+          <i class="fa-solid fa-screwdriver-wrench text-sky-500"></i>
+        </div>
+        <h3 id="mProgress" class="text-2xl font-extrabold text-sky-600">--</h3>
+        <p class="text-[10px] text-slate-400 mt-1">Field teams deployed</p>
+      </div>
+
+      <!-- Resolved -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Resolved</span>
+          <i class="fa-solid fa-circle-check text-emerald-500"></i>
+        </div>
+        <h3 id="mResolved" class="text-2xl font-extrabold text-emerald-600">--</h3>
+        <p class="text-[10px] text-slate-400 mt-1">With resolution notes</p>
+      </div>
+
+      <!-- Overdue -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-red-700">Overdue SLA</span>
+          <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
+        </div>
+        <h3 id="mOverdue" class="text-2xl font-extrabold text-red-600">--</h3>
+        <p class="text-[10px] text-slate-400 mt-1">> 7 days turnaround</p>
+      </div>
+
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+      
+      <!-- Search Input -->
+      <div class="relative flex-1">
+        <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 top-3"></i>
+        <input type="text" id="staffSearchInput" class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search by Tracking ID (CF-...), Title, Address...">
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Status Filter -->
+        <select id="staffFilterStatus" class="p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none">
+          <option value="All">All Statuses</option>
+          <option value="Submitted">Submitted</option>
+          <option value="Under Review">Under Review</option>
+          <option value="Assigned">Assigned</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Reopened">Reopened</option>
+        </select>
+
+        <!-- Department Filter -->
+        <select id="staffFilterDept" class="p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none">
+          <option value="All">All Departments</option>
+        </select>
+
+        <!-- Priority Filter -->
+        <select id="staffFilterPriority" class="p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none">
+          <option value="All">All Priorities</option>
+          <option value="Urgent">Urgent</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+
+        <!-- Sorting -->
+        <select id="staffFilterSort" class="p-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:outline-none">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="priority">Highest Priority</option>
+          <option value="most_supported">Most Supported</option>
+        </select>
+      </div>
+
+    </div>
+
+    <!-- Issues Data Table -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <th class="py-3 px-4">Tracking ID</th>
+              <th class="py-3 px-4">Issue Title & Location</th>
+              <th class="py-3 px-4">Category</th>
+              <th class="py-3 px-4">Priority</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4">Assigned Department</th>
+              <th class="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="staffIssuesTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="staffEmptyState" class="hidden text-center py-12">
+        <i class="fa-solid fa-folder-open text-3xl text-slate-300 mb-2"></i>
+        <p class="text-xs text-slate-500">No complaints matching current filters.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== ISSUE REVIEW & UPDATE MODAL ==================== -->
+  <div id="reviewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl my-8 overflow-hidden">
+      
+      <!-- Header -->
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-file-pen"></i>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold tracking-wider text-blue-300">Complaint Review & Status Update</span>
+            <h3 id="modalTrackingId" class="text-lg font-black tracking-tight">CF-2026-XXXXX</h3>
+          </div>
+        </div>
+        <button id="closeReviewModalBtn" class="text-slate-400 hover:text-white text-lg p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <form id="staffUpdateForm" class="p-6 space-y-5 max-h-[75vh] overflow-y-auto text-xs">
+        
+        <!-- Summary & Mini-map Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Left: Details -->
+          <div class="space-y-3">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Issue Title</span>
+              <h4 id="modalIssueTitle" class="font-bold text-slate-900 text-sm mt-0.5">Title</h4>
+            </div>
+
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Description</span>
+              <p id="modalIssueDesc" class="text-slate-600 text-xs mt-0.5 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-200">Description</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Address</span>
+                <p id="modalIssueAddress" class="font-semibold text-slate-800 text-xs truncate">Address</p>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Citizen Support</span>
+                <p class="font-semibold text-amber-600 text-xs">👍 <span id="modalSupportsCount">0</span> citizens</p>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Reported By</span>
+              <p id="modalCitizenInfo" class="text-slate-700 text-xs">Citizen Name & Contact</p>
+            </div>
+          </div>
+
+          <!-- Right: Photo & Map -->
+          <div class="space-y-2">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Uploaded Photo</span>
+              <img id="modalIssuePhoto" class="w-full h-32 rounded-lg object-cover border border-slate-200 shadow-sm" src="" alt="Issue Photo">
+            </div>
+
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">GPS Inspection Location</span>
+              <div class="w-full h-28 rounded-lg overflow-hidden border border-slate-200 relative">
+                <div id="staffInspectionMap" class="w-full h-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Official Status & Assignment Controls -->
+        <div class="p-4 bg-blue-50/60 rounded-xl border border-blue-200/80 space-y-4">
+          <h5 class="font-bold text-blue-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders"></i> Official Operational Controls
+          </h5>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            
+            <!-- Status Progression -->
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Workflow Status *</label>
+              <select id="modalStatusSelect" required class="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="Submitted">Submitted</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Assigned">Assigned</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved (Complete)</option>
+                <option value="Reopened">Reopened</option>
+              </select>
+            </div>
+
+            <!-- Department Assignment -->
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Assign Department *</label>
+              <select id="modalDeptSelect" required class="w-full p-2 bg-white border border-slate-200 rounded-lg font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+
+            <!-- Priority -->
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Priority Level *</label>
+              <select id="modalPrioritySelect" required class="w-full p-2 bg-white border border-slate-200 rounded-lg font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+
+          </div>
+
+          <!-- Mandatory Resolution Notes & Proof (Displayed when Resolved is selected) -->
+          <div id="modalResNotesGroup" class="hidden space-y-3 pt-2 border-t border-blue-200">
+            <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-300">
+              <label class="block font-bold text-emerald-900 mb-1">
+                <i class="fa-solid fa-circle-exclamation mr-1 text-emerald-600"></i>
+                Resolution Notes (Strictly Mandatory for "Resolved") *
+              </label>
+              <textarea id="modalResNotes" rows="2" class="w-full p-2 bg-white border border-emerald-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none" placeholder="Detail how the issue was fixed (e.g. Asphalting completed on 24-Oct by crew #3)..."></textarea>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Resolution Proof Photo URL (Optional)</label>
+              <input type="text" id="modalResPhotoUrl" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none" placeholder="https://... photo link of repaired infrastructure">
+            </div>
+          </div>
+
+          <!-- General Staff Internal Notes -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Officer Update Note (Logged in Audit History)</label>
+            <input type="text" id="modalStaffNotes" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none" placeholder="e.g. Inspection completed; road patch unit scheduled for tomorrow morning.">
+          </div>
+
+        </div>
+
+        <!-- Audit History Timeline -->
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Immutable Status History</span>
+          <div id="modalStatusHistory" class="bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-36 overflow-y-auto space-y-1">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Modal Submit Actions -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+          <button type="button" onclick="document.getElementById('reviewModal').classList.add('hidden')" class="px-4 py-2 rounded-lg font-semibold text-slate-600 hover:bg-slate-100 transition">
+            Cancel
+          </button>
+          <button type="submit" id="staffSaveUpdateBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow transition">
+            Save Status Update
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== DEMO / STAFF LOGIN MODAL ==================== -->
+  <div id="staffLoginModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-5">
+      
+      <div class="text-center">
+        <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl mx-auto shadow-md mb-2">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3 class="font-bold text-xl text-slate-900">Municipal Staff Authentication</h3>
+        <p class="text-xs text-slate-500 mt-1">Authorized municipal personnel and administrative commissioners only.</p>
+      </div>
+
+      <!-- Quick 1-Click Demo Accounts for Judges -->
+      <div class="bg-blue-50 p-3.5 rounded-xl border border-blue-200">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-blue-900 block mb-2">
+          <i class="fa-solid fa-key mr-1"></i> Quick 1-Click Demo Logins for Evaluators:
+        </span>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="demoLoginAs('admin')" class="bg-white hover:bg-blue-100 text-blue-800 text-[11px] font-bold py-2 px-2.5 rounded-lg border border-blue-200 shadow-sm text-left transition">
+            👑 City Admin<br><span class="text-[9px] text-slate-400 font-normal">Commissioner Rao</span>
+          </button>
+          <button onclick="demoLoginAs('roads')" class="bg-white hover:bg-blue-100 text-blue-800 text-[11px] font-bold py-2 px-2.5 rounded-lg border border-blue-200 shadow-sm text-left transition">
+            🚧 Roads Inspector<br><span class="text-[9px] text-slate-400 font-normal">Rajesh Sharma</span>
+          </button>
+          <button onclick="demoLoginAs('waste')" class="bg-white hover:bg-blue-100 text-blue-800 text-[11px] font-bold py-2 px-2.5 rounded-lg border border-blue-200 shadow-sm text-left transition">
+            ♻️ Sanitation Officer<br><span class="text-[9px] text-slate-400 font-normal">Anita Verma</span>
+          </button>
+          <button onclick="demoLoginAs('lighting')" class="bg-white hover:bg-blue-100 text-blue-800 text-[11px] font-bold py-2 px-2.5 rounded-lg border border-blue-200 shadow-sm text-left transition">
+            💡 Electrical Eng.<br><span class="text-[9px] text-slate-400 font-normal">Vikram Patil</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Regular Email/Password Form -->
+      <form onsubmit="event.preventDefault(); handleStaffLogin(document.getElementById('loginEmail').value, document.getElementById('loginPass').value);" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="loginEmail" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" value="admin@civicfix.gov">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Password</label>
+          <input type="password" id="loginPass" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" value="admin123">
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow transition text-xs mt-2">
+          Sign In to Staff Console
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/staff.js"></script>
+</body>
+</html>
