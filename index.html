@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicFix – Smart Public Infrastructure Issue Tracker</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Custom Theme CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            civic: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased flex flex-col min-h-screen">
+
+  <!-- ==================== TOP NAVIGATION ==================== -->
+  <header class="sticky top-0 z-50 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="flex items-center gap-2.5 py-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i class="fa-solid fa-shield-halved text-xl"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-blue-900" data-i18n="app_title">CivicFix</span>
+          <span class="hidden sm:inline-block ml-2 text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Smart Civic Tech</span>
+        </div>
+      </a>
+
+      <!-- Desktop Links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+        <a href="#howItWorks" class="hover:text-blue-600 transition" data-i18n="nav_how">How It Works</a>
+        <a href="#mapSection" class="hover:text-blue-600 transition" data-i18n="nav_map">Live Map</a>
+        <a href="#trackSection" class="hover:text-blue-600 transition" data-i18n="nav_track">Track Complaint</a>
+        <a href="analytics.html" class="hover:text-blue-600 transition flex items-center gap-1.5" data-i18n="nav_analytics">
+          <i class="fa-solid fa-chart-pie text-xs"></i> Analytics
+        </a>
+        <a href="staff.html" class="hover:text-blue-600 transition flex items-center gap-1.5 text-amber-700 font-bold" data-i18n="nav_staff">
+          <i class="fa-solid fa-user-shield text-xs"></i> Staff Portal
+        </a>
+      </nav>
+
+      <!-- Language Selector & CTA -->
+      <div class="flex items-center gap-3">
+        <!-- Language Switcher (10 Languages) -->
+        <div class="relative flex items-center">
+          <i class="fa-solid fa-globe text-slate-400 text-xs absolute left-2.5 pointer-events-none"></i>
+          <select id="langSelect" class="text-xs font-semibold pl-7 pr-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+            <option value="en">English (US)</option>
+            <option value="hi">हिंदी (Hindi)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="mr">मराठी (Marathi)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            <option value="es">Español (Spanish)</option>
+            <option value="fr">Français (French)</option>
+            <option value="de">Deutsch (German)</option>
+          </select>
+        </div>
+
+        <!-- Primary CTA Button -->
+        <button id="openReportModalBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg shadow-sm hover:shadow transition flex items-center gap-1.5">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span data-i18n="btn_report">Report an Issue</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== HERO SECTION ==================== -->
+  <section class="hero-gradient text-white py-16 lg:py-24 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      
+      <div class="lg:col-span-7 space-y-6">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Municipal Open Transparency Platform</span>
+        </div>
+        
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight" data-i18n="hero_title">
+          Empowering Citizens, Fixing Communities
+        </h1>
+        
+        <p class="text-slate-200 text-base sm:text-lg max-w-2xl leading-relaxed" data-i18n="hero_subtitle">
+          The smart, AI-assisted public infrastructure issue tracker. Report potholes, streetlights, drainage, and waste with instant GPS mapping, duplicate detection, and municipal transparency.
+        </p>
+
+        <div class="flex flex-wrap gap-4 pt-2">
+          <button id="heroReportBtn" class="bg-white text-blue-900 hover:bg-blue-50 font-bold px-6 py-3.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm sm:text-base">
+            <i class="fa-solid fa-circle-exclamation text-blue-600"></i>
+            <span data-i18n="btn_report">Report an Issue</span>
+          </button>
+          
+          <button id="heroTrackBtn" class="bg-blue-800/60 hover:bg-blue-800 text-white font-bold px-6 py-3.5 rounded-xl border border-blue-400/30 shadow-lg transition flex items-center gap-2 text-sm sm:text-base">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span data-i18n="btn_track">Track Complaint</span>
+          </button>
+
+          <a href="#mapSection" class="bg-transparent hover:bg-white/10 text-white font-medium px-4 py-3.5 rounded-xl transition flex items-center gap-1.5 text-sm sm:text-base">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span data-i18n="btn_view_map">View Live Map</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Database Quick Metrics Card -->
+      <div class="lg:col-span-5">
+        <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-2xl">
+          <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-5">
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-chart-line text-blue-400"></i>
+              <h3 class="font-bold text-sm text-slate-100">Live City Infrastructure Vitality</h3>
+            </div>
+            <span class="text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full">DB Connected</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+              <p class="text-xs text-slate-300 mb-1" data-i18n="stat_total">Total Reported</p>
+              <h4 id="statTotal" class="text-3xl font-extrabold text-white">--</h4>
+              <p class="text-[10px] text-blue-300 mt-1">From citizens & city staff</p>
+            </div>
+
+            <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+              <p class="text-xs text-slate-300 mb-1" data-i18n="stat_resolved">Resolved Issues</p>
+              <h4 id="statResolved" class="text-3xl font-extrabold text-emerald-400">--</h4>
+              <p class="text-[10px] text-emerald-300 mt-1">Verified with proof photo</p>
+            </div>
+
+            <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+              <p class="text-xs text-slate-300 mb-1" data-i18n="stat_rate">Resolution Rate</p>
+              <h4 id="statRate" class="text-3xl font-extrabold text-blue-400">--%</h4>
+              <p class="text-[10px] text-blue-300 mt-1">Municipal efficiency</p>
+            </div>
+
+            <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+              <p class="text-xs text-slate-300 mb-1" data-i18n="stat_avg_days">Avg. Resolution Time</p>
+              <h4 id="statAvgDays" class="text-3xl font-extrabold text-amber-400">-- d</h4>
+              <p class="text-[10px] text-amber-300 mt-1">Target SLA: 7 days</p>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
+            <span>Active Issues In Progress: <strong id="statInProgress" class="text-white">--</strong></span>
+            <a href="analytics.html" class="text-blue-300 hover:text-white font-semibold underline flex items-center gap-1">
+              Full Analytics <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== HOW IT WORKS SECTION ==================== -->
+  <section id="howItWorks" class="py-16 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" data-i18n="how_title">
+          How CivicFix Works
+        </h2>
+        <p class="text-slate-600 mt-2 text-sm sm:text-base" data-i18n="how_subtitle">
+          A seamless, transparent loop connecting citizens with municipal field crews.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Step 1 -->
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl font-bold mb-4">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 mb-2 text-base" data-i18n="how_step1_title">1. Snap & Report</h3>
+          <p class="text-slate-600 text-xs sm:text-sm leading-relaxed" data-i18n="how_step1_desc">
+            Capture a photo, dictate using voice, and pin the exact GPS coordinates on our interactive map.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl font-bold mb-4">
+            <i class="fa-solid fa-clone"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 mb-2 text-base" data-i18n="how_step2_title">2. Smart Duplicate AI</h3>
+          <p class="text-slate-600 text-xs sm:text-sm leading-relaxed" data-i18n="how_step2_desc">
+            Our proximity and text similarity engine flags matching issues nearby so you can upvote instead of duplicate.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-bold mb-4">
+            <i class="fa-solid fa-sitemap"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 mb-2 text-base" data-i18n="how_step3_title">3. Direct Routing</h3>
+          <p class="text-slate-600 text-xs sm:text-sm leading-relaxed" data-i18n="how_step3_desc">
+            Automatically assigned to municipal departments (Roads, Sanitation, Lighting, Water) with SLA monitoring.
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold mb-4">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 mb-2 text-base" data-i18n="how_step4_title">4. Verified Resolution</h3>
+          <p class="text-slate-600 text-xs sm:text-sm leading-relaxed" data-i18n="how_step4_desc">
+            Staff upload photographic proof and notes before marking resolved. Citizens track live timeline updates.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ISSUE CATEGORIES GRID ==================== -->
+  <section class="py-14 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight" data-i18n="cat_title">
+            Common Infrastructure Categories
+          </h2>
+          <p class="text-slate-500 text-xs sm:text-sm mt-1">Click any category to quick-report a problem</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        
+        <!-- Potholes -->
+        <div class="cat-card-shortcut bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-md transition cursor-pointer text-center group" data-category="Potholes & Road Damage">
+          <div class="w-12 h-12 mx-auto rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-lg mb-2.5 group-hover:scale-110 transition">
+            <i class="fa-solid fa-road"></i>
+          </div>
+          <h4 class="font-semibold text-xs text-slate-800 group-hover:text-blue-600 transition" data-i18n="cat_roads">Potholes & Roads</h4>
+        </div>
+
+        <!-- Streetlights -->
+        <div class="cat-card-shortcut bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-md transition cursor-pointer text-center group" data-category="Broken Streetlights & Electrical">
+          <div class="w-12 h-12 mx-auto rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-lg mb-2.5 group-hover:scale-110 transition">
+            <i class="fa-solid fa-lightbulb"></i>
+          </div>
+          <h4 class="font-semibold text-xs text-slate-800 group-hover:text-blue-600 transition" data-i18n="cat_lighting">Streetlights</h4>
+        </div>
+
+        <!-- Footpaths -->
+        <div class="cat-card-shortcut bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-md transition cursor-pointer text-center group" data-category="Damaged Footpaths & Walkways">
+          <div class="w-12 h-12 mx-auto rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-lg mb-2.5 group-hover:scale-110 transition">
+            <i class="fa-solid fa-person-walking"></i>
+          </div>
+          <h4 class="font-semibold text-xs text-slate-800 group-hover:text-blue-600 transition" data-i18n="cat_footpaths">Footpaths</h4>
+        </div>
+
+        <!-- Water / Drainage -->
+        <div class="cat-card-shortcut bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-md transition cursor-pointer text-center group" data-category="Drainage & Water Supply Leaks">
+          <div class="w-12 h-12 mx-auto rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-lg mb-2.5 group-hover:scale-110 transition">
+            <i class="fa-solid fa-faucet-drip"></i>
+          </div>
+          <h4 class="font-semibold text-xs text-slate-800 group-hover:text-blue-600 transition" data-i18n="cat_water">Drainage & Leaks</h4>
+        </div>
+
+        <!-- Garbage -->
+        <div class="cat-card-shortcut bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-md transition cursor-pointer text-center group" data-category="Overflowing Garbage & Sanitation">
+          <div class="w-12 h-12 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg mb-2.5 group-hover:scale-110 transition">
+            <i class="fa-solid fa-trash-can"></i>
+          </div>
+          <h4 class="font-semibold text-xs text-slate-800 group-hover:text-blue-600 transition" data-i18n="cat_waste">Garbage & Waste</h4>
+        </div>
+
+        <!-- Parks -->
+        <div class="cat-card-shortcut bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:shadow-md transition cursor-pointer text-center group" data-category="Parks & Public Facilities">
+          <div class="w-12 h-12 mx-auto rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg mb-2.5 group-hover:scale-110 transition">
+            <i class="fa-solid fa-tree"></i>
+          </div>
+          <h4 class="font-semibold text-xs text-slate-800 group-hover:text-blue-600 transition" data-i18n="cat_parks">Parks & Trees</h4>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== LIVE INTERACTIVE MAP SECTION ==================== -->
+  <section id="mapSection" class="py-14 bg-white border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900 tracking-tight" data-i18n="nav_map">
+            Live Public Infrastructure Map
+          </h2>
+          <p class="text-slate-500 text-xs sm:text-sm">Real-time geo-located markers with category icons and status badges</p>
+        </div>
+
+        <!-- Map Filter Buttons -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button class="map-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm transition" data-status="All">
+            All Issues
+          </button>
+          <button class="map-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 shadow-sm transition" data-status="Submitted">
+            Submitted
+          </button>
+          <button class="map-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 shadow-sm transition" data-status="In Progress">
+            In Progress
+          </button>
+          <button class="map-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 shadow-sm transition" data-status="Resolved">
+            Resolved
+          </button>
+        </div>
+      </div>
+
+      <!-- Leaflet Map Container -->
+      <div class="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-lg border border-slate-200">
+        <div id="mainMap" class="w-full h-full"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TRACK COMPLAINT SECTION ==================== -->
+  <section id="trackSection" class="py-16 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" data-i18n="track_title">
+          Track Your Complaint
+        </h2>
+        <p class="text-slate-600 text-xs sm:text-sm mt-1" data-i18n="track_subtitle">
+          Enter your unique Tracking ID to see live department assignments and work timeline.
+        </p>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="bg-white p-3 rounded-2xl shadow-md border border-slate-200 flex items-center gap-2 mb-8">
+        <div class="pl-3 text-slate-400">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <input type="text" id="trackIdInput" class="w-full text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none" placeholder="Enter Tracking ID (e.g. CF-2026-10492)" data-i18n="track_ph">
+        <button id="trackSearchBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow transition shrink-0" data-i18n="btn_search_track">
+          Track Status
+        </button>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div id="trackLoading" class="hidden text-center py-8">
+        <i class="fa-solid fa-spinner fa-spin text-3xl text-blue-600"></i>
+        <p class="text-xs text-slate-500 mt-2">Searching municipal records...</p>
+      </div>
+
+      <!-- Track Result Card -->
+      <div id="trackResultCard" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2 mb-6">
+          <div>
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Complaint Tracking ID</span>
+            <h3 id="trackResId" class="text-2xl font-black text-slate-900">CF-2026-XXXXX</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="trackResStatus" class="badge-status badge-in-progress">In Progress</span>
+            <span id="trackResSupports" class="text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+              18 supporters
+            </span>
+          </div>
+        </div>
+
+        <!-- Visual Stepper Progress Bar -->
+        <div class="tracking-stepper">
+          <div id="stepNode_Submitted" class="step-node completed">
+            <div class="step-circle"><i class="fa-solid fa-file-circle-check text-xs"></i></div>
+            <span class="step-label">Submitted</span>
+          </div>
+          <div id="stepNode_UnderReview" class="step-node completed">
+            <div class="step-circle"><i class="fa-solid fa-magnifying-glass text-xs"></i></div>
+            <span class="step-label">Under Review</span>
+          </div>
+          <div id="stepNode_Assigned" class="step-node active">
+            <div class="step-circle"><i class="fa-solid fa-user-gear text-xs"></i></div>
+            <span class="step-label">Assigned</span>
+          </div>
+          <div id="stepNode_InProgress" class="step-node">
+            <div class="step-circle"><i class="fa-solid fa-screwdriver-wrench text-xs"></i></div>
+            <span class="step-label">In Progress</span>
+          </div>
+          <div id="stepNode_Resolved" class="step-node">
+            <div class="step-circle"><i class="fa-solid fa-check-double text-xs"></i></div>
+            <span class="step-label">Resolved</span>
+          </div>
+        </div>
+
+        <!-- Issue Details Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-6 pt-4 border-t border-slate-100">
+          <div class="md:col-span-2 space-y-3">
+            <h4 id="trackResTitle" class="text-lg font-bold text-slate-800">Dangerous deep pothole near City Center Mall</h4>
+            <p class="text-xs text-slate-500">📍 <span id="trackResAddress">MG Road, Central District</span></p>
+            
+            <div class="grid grid-cols-2 gap-3 text-xs pt-2">
+              <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                <span class="text-slate-400 block text-[10px] uppercase font-bold">Category</span>
+                <span id="trackResCategory" class="font-semibold text-slate-800">Potholes & Road Damage</span>
+              </div>
+              <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                <span class="text-slate-400 block text-[10px] uppercase font-bold">Assigned Department</span>
+                <span id="trackResDept" class="font-semibold text-blue-700">Roads & Bridges Department</span>
+              </div>
+            </div>
+
+            <!-- Resolution Notes & Photo Block (If Resolved) -->
+            <div id="trackResolutionBlock" class="hidden mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+              <div class="flex items-center gap-2 text-emerald-800 font-bold text-xs mb-1">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Official Municipal Resolution Report</span>
+              </div>
+              <p id="trackResNotes" class="text-xs text-emerald-900 mt-1">Filled with asphalt and compacted.</p>
+              <img id="trackResProofPhoto" class="hidden mt-3 h-36 rounded-lg object-cover border border-emerald-300 shadow-sm" alt="Resolution proof">
+            </div>
+          </div>
+
+          <!-- Uploaded Photo Column -->
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 block">Reported Photo Proof</span>
+            <img id="trackResPhoto" class="w-full h-40 object-cover rounded-xl border border-slate-200 shadow-sm" src="" alt="Issue Photo">
+          </div>
+        </div>
+
+        <!-- Audit History Timeline -->
+        <div class="mt-6 pt-4 border-t border-slate-100">
+          <h5 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Status Audit Timeline</h5>
+          <div id="trackHistoryTimeline" class="space-y-1">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== REPORT ISSUE MODAL ==================== -->
+  <div id="reportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl my-8 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-lg text-slate-900" data-i18n="report_modal_title">Report an Infrastructure Issue</h3>
+          <p class="text-xs text-slate-500" data-i18n="report_modal_subtitle">Fill in the details below. Our smart detector will verify nearby records.</p>
+        </div>
+        <button id="closeReportModalBtn" class="text-slate-400 hover:text-slate-600 text-lg p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body / Form -->
+      <form id="citizenReportForm" class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+        
+        <!-- Category & Priority -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="form_category">Select Category *</label>
+            <select id="issueCategory" required class="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="Potholes & Road Damage">Potholes & Road Damage</option>
+              <option value="Broken Streetlights & Electrical">Broken Streetlights & Electrical</option>
+              <option value="Damaged Footpaths & Walkways">Damaged Footpaths & Walkways</option>
+              <option value="Drainage & Water Supply Leaks">Drainage & Water Supply Leaks</option>
+              <option value="Overflowing Garbage & Sanitation">Overflowing Garbage & Sanitation</option>
+              <option value="Parks & Public Facilities">Parks & Public Facilities</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="form_priority">Citizen Severity Assessment</label>
+            <select id="issuePriority" class="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="Low">Low (Minor inconvenience)</option>
+              <option value="Medium" selected>Medium (Standard impact)</option>
+              <option value="High">High (Disruptive / Hazardous)</option>
+              <option value="Urgent">Urgent (Immediate danger to safety)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Title with Voice Dictation -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-700" data-i18n="form_title">Issue Title / Summary *</label>
+            <button type="button" id="issueTitleMicBtn" onclick="window.triggerVoiceDictation('issueTitle')" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 p-1 rounded">
+              <i class="fa-solid fa-microphone"></i> <span>Voice Input</span>
+            </button>
+          </div>
+          <input type="text" id="issueTitle" required class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Deep pothole causing skidding near bus stop" data-i18n="form_title_ph">
+        </div>
+
+        <!-- Description with Voice Dictation -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-700" data-i18n="form_desc">Detailed Description *</label>
+            <button type="button" id="issueDescMicBtn" onclick="window.triggerVoiceDictation('issueDesc')" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 p-1 rounded">
+              <i class="fa-solid fa-microphone"></i> <span>Voice Input</span>
+            </button>
+          </div>
+          <textarea id="issueDesc" rows="3" required class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Provide details such as size, duration, landmark, or hazard level..." data-i18n="form_desc_ph"></textarea>
+        </div>
+
+        <!-- Photo Upload Dropzone -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="form_photo">Upload Photo Proof</label>
+          <div id="photoDropZone" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:bg-slate-50 transition relative cursor-pointer">
+            <input type="file" id="photoInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+            <div class="space-y-1">
+              <i class="fa-solid fa-camera text-2xl text-slate-400"></i>
+              <p class="text-xs text-slate-600 font-medium" data-i18n="form_photo_hint">Drag & drop or click to upload (PNG, JPG)</p>
+            </div>
+            <img id="photoPreview" class="hidden mt-3 max-h-36 mx-auto rounded-lg shadow-sm border border-slate-200 object-cover" alt="Preview">
+          </div>
+        </div>
+
+        <!-- Interactive Location Pin Picker (Leaflet) -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-700" data-i18n="form_location">Pin Location on Map *</label>
+            <button type="button" id="useMyLocationBtn" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-location-crosshairs"></i> <span data-i18n="btn_my_location">Use My GPS Location</span>
+            </button>
+          </div>
+          <div class="w-full h-44 rounded-xl overflow-hidden border border-slate-200 shadow-sm relative">
+            <div id="reportMiniMap" class="w-full h-full"></div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">Drag the marker or click on the map to accurately pinpoint the issue.</p>
+        </div>
+
+        <!-- Address & Hidden Coordinates -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="form_address">Street Address / Landmark *</label>
+            <input type="text" id="issueAddress" required class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. MG Road, Opp. Metro Pillar 42">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Coordinates</label>
+            <div class="flex gap-1">
+              <input type="text" id="issueLat" readonly class="w-1/2 text-[11px] p-2 bg-slate-100 border border-slate-200 rounded text-slate-600" value="12.9716">
+              <input type="text" id="issueLng" readonly class="w-1/2 text-[11px] p-2 bg-slate-100 border border-slate-200 rounded text-slate-600" value="77.5946">
+            </div>
+          </div>
+        </div>
+
+        <!-- Citizen Contact (Optional) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="form_name">Your Name (Optional)</label>
+            <input type="text" id="citizenName" class="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none" placeholder="Leave blank for Anonymous">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="form_contact">Phone / Email (For Updates)</label>
+            <input type="text" id="citizenPhone" class="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none" placeholder="e.g. +91 98765 43210">
+            <input type="hidden" id="citizenEmail" value="">
+          </div>
+        </div>
+
+        <!-- Submit & Actions -->
+        <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-200">
+          <button type="button" onclick="document.getElementById('reportModal').classList.add('hidden')" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition" data-i18n="btn_cancel">
+            Cancel
+          </button>
+          <button type="submit" id="submitReportBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow-md transition" data-i18n="btn_submit_complaint">
+            Submit Complaint
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== SMART DUPLICATE DETECTION MODAL ==================== -->
+  <div id="duplicateModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl border-2 border-amber-400 w-full max-w-lg overflow-hidden animate-bounce-short">
+      
+      <!-- Header -->
+      <div class="px-6 py-4 bg-amber-50 border-b border-amber-200 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center text-lg shrink-0">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-base" data-i18n="dup_alert_title">Possible Duplicate Issue Detected!</h3>
+          <p class="text-xs text-amber-800" data-i18n="dup_alert_subtitle">An active complaint matching your category and location was found nearby.</p>
+        </div>
+      </div>
+
+      <!-- Comparison Card -->
+      <div class="p-6 space-y-4">
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span id="dupStatus" class="badge-status badge-in-progress">In Progress</span>
+            <span id="dupDistance" class="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">35 meters away</span>
+          </div>
+          <h4 id="dupTitle" class="font-bold text-slate-900 text-sm">Dangerous deep pothole near City Center Mall Entrance</h4>
+          <p class="text-xs text-slate-500 truncate">📍 <span id="dupAddress">MG Road, Central District</span></p>
+          <div class="flex items-center justify-between text-[11px] text-slate-600 pt-1">
+            <span id="dupSupports" class="font-semibold text-amber-600">👍 18 citizens supported</span>
+            <span id="dupMatchConfidence" class="text-slate-400 font-medium">92% match</span>
+          </div>
+          <img id="dupPhoto" class="hidden w-full h-32 rounded-lg object-cover border border-slate-200 shadow-sm mt-2" alt="Existing photo">
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Supporting this existing complaint elevates its priority score for city engineers without cluttering the municipal dashboard with duplicate records.
+        </p>
+
+        <!-- Actions -->
+        <div class="space-y-2 pt-2">
+          <button id="dupSupportBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow transition text-xs sm:text-sm flex items-center justify-center gap-2" data-i18n="btn_support_existing">
+            👍 Support Existing Report (+1 Upvote)
+          </button>
+          
+          <button id="dupSubmitAnywayBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-1.5" data-i18n="btn_submit_anyway">
+            Submit as New Separate Report
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== CONFIRMATION MODAL ==================== -->
+  <div id="confirmationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 text-center space-y-4">
+      <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto shadow-inner">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-xl text-slate-900">Complaint Recorded</h3>
+        <p id="confMessage" class="text-xs text-slate-500 mt-1">Your infrastructure complaint has been registered.</p>
+      </div>
+
+      <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Your Tracking ID</span>
+        <h4 id="confTrackingId" class="text-2xl font-black text-blue-700 tracking-wider">CF-2026-XXXXX</h4>
+        <button id="confCopyBtn" class="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center justify-center gap-1 mx-auto">
+          <i class="fa-solid fa-copy"></i> Copy ID
+        </button>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="confTrackNowBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-xs shadow transition">
+          Track Progress Now
+        </button>
+        <button id="confCloseBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-xs transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FLOATING CIVICBOT CHATBOT & VOICE ASSISTANT ==================== -->
+  <div class="civic-chat-widget">
+    <!-- Floating Circular Button -->
+    <div id="civicChatToggle" class="civic-chat-btn" title="Chat with CivicBot AI Assistant">
+      <i class="fa-solid fa-robot"></i>
+      <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+    </div>
+
+    <!-- Chat Window -->
+    <div id="civicChatWindow" class="civic-chat-window hidden">
+      <!-- Chat Header -->
+      <div class="bg-gradient-to-r from-blue-700 to-blue-600 text-white px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-xs" data-i18n="chatbot_title">CivicBot AI Assistant</h4>
+            <span class="text-[10px] text-blue-200 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online & Voice Ready
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Text to speech speaker button -->
+          <button id="civicChatSpeaker" class="text-white/80 hover:text-white text-xs p-1" title="Toggle Voice Speech Output">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+          <button id="civicChatClose" class="text-white/80 hover:text-white text-sm p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Action Prompt Chips -->
+      <div class="bg-blue-50/70 px-3 py-2 border-b border-blue-100 flex items-center gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap">
+        <button class="chat-quick-prompt bg-white hover:bg-blue-100 text-blue-700 px-2 py-1 rounded-full border border-blue-200 font-medium">
+          Where is CF-2026-10492?
+        </button>
+        <button class="chat-quick-prompt bg-white hover:bg-blue-100 text-blue-700 px-2 py-1 rounded-full border border-blue-200 font-medium">
+          How to report pothole?
+        </button>
+        <button class="chat-quick-prompt bg-white hover:bg-blue-100 text-blue-700 px-2 py-1 rounded-full border border-blue-200 font-medium">
+          Emergency helplines
+        </button>
+      </div>
+
+      <!-- Messages Body -->
+      <div id="civicChatMessages" class="flex-1 p-4 overflow-y-auto space-y-2">
+        <div class="flex mb-3 justify-start">
+          <div class="max-w-[85%] rounded-2xl rounded-bl-none px-4 py-2.5 text-xs bg-gray-100 text-gray-800 border border-gray-200">
+            Hello! I am <strong>CivicBot</strong>, your smart municipal voice & AI assistant. Ask me anything about filing complaints, checking status with a Tracking ID (e.g. <code>CF-2026-10492</code>), or tap the microphone to speak!
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Footer -->
+      <div class="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+        <button id="civicChatMic" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center shrink-0 transition" title="Speak via Voice (Web Speech API)">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+        <input type="text" id="civicChatInput" class="flex-1 text-xs py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ask CivicBot or enter CF-..." data-i18n="chatbot_ph">
+        <button id="civicChatSend" class="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 shadow-sm transition">
+          <i class="fa-solid fa-paper-plane text-xs"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="mt-auto bg-slate-900 text-slate-400 text-xs py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+      
+      <div class="space-y-3">
+        <div class="flex items-center gap-2 text-white font-black text-lg">
+          <i class="fa-solid fa-shield-halved text-blue-500"></i>
+          <span>CivicFix</span>
+        </div>
+        <p class="text-slate-400 text-xs leading-relaxed">
+          Smart Public Infrastructure Issue Tracker developed for the College Hackathon 2026. Powered by AI duplicate detection, GPS mapping, voice assistance, and transparent municipal workflow.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="text-white font-bold mb-3 uppercase tracking-wider text-[11px]">Quick Links</h4>
+        <ul class="space-y-2">
+          <li><a href="#howItWorks" class="hover:text-white transition">How It Works</a></li>
+          <li><a href="#mapSection" class="hover:text-white transition">Live Issue Map</a></li>
+          <li><a href="#trackSection" class="hover:text-white transition">Track Complaint</a></li>
+          <li><a href="analytics.html" class="hover:text-white transition">City Analytics Dashboard</a></li>
+          <li><a href="staff.html" class="hover:text-white transition">Municipal Staff Login</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-white font-bold mb-3 uppercase tracking-wider text-[11px]">Municipal Emergency Helplines</h4>
+        <ul class="space-y-1.5 text-[11px]">
+          <li>Central City Helpline: <strong class="text-white">1912</strong></li>
+          <li>Disaster Relief: <strong class="text-white">1077</strong></li>
+          <li>Water Board Toll-Free: <strong class="text-white">1800-425-9898</strong></li>
+          <li>Fire & Emergency: <strong class="text-white">101</strong></li>
+          <li>Ambulance: <strong class="text-white">108</strong></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-white font-bold mb-3 uppercase tracking-wider text-[11px]">Hackathon Team Details</h4>
+        <p class="text-[11px] leading-relaxed">
+          <strong>Team Tech Titans</strong><br>
+          Project: CivicFix Infrastructure Platform<br>
+          Tech Stack: Node.js, SQLite, Leaflet, Chart.js, Web Speech API, Tailwind CSS.
+        </p>
+        <div class="mt-3 flex items-center gap-2">
+          <span class="inline-block px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold">10 Languages</span>
+          <span class="inline-block px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Voice Enabled</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/chatbot.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
