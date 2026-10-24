@@ -11,7 +11,7 @@ const { getDb, hashPassword } = require('./database');
 const { findPotentialDuplicates } = require('./duplicateDetector');
 
 const PORT = process.env.PORT || 5000;
-const PUBLIC_DIR = path.join(__dirname, 'public');
+const PUBLIC_DIR = __dirname;
 
 // MIME types for static asset serving
 const MIME_TYPES = {
