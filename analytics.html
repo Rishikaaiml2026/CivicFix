@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicFix – Public Transparency & City Infrastructure Analytics</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Theme CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- ==================== NAVIGATION ==================== -->
+  <header class="glass-nav sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="flex items-center gap-2.5 py-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
+          <i class="fa-solid fa-chart-pie text-xl"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-blue-900">CivicFix</span>
+          <span class="hidden sm:inline-block ml-2 text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Transparency Analytics</span>
+        </div>
+      </a>
+
+      <!-- Links -->
+      <nav class="flex items-center gap-6 text-sm font-semibold text-slate-600">
+        <a href="index.html" class="hover:text-blue-600 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-house text-xs"></i> Public Portal
+        </a>
+        <a href="index.html#mapSection" class="hover:text-blue-600 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-map text-xs"></i> Live Map
+        </a>
+        <a href="staff.html" class="hover:text-blue-600 transition flex items-center gap-1.5 text-amber-700 font-bold">
+          <i class="fa-solid fa-user-shield text-xs"></i> Staff Portal
+        </a>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN ANALYTICS CONTENT ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Title Banner -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Municipal Open Transparency Dashboard</h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">Real-time infrastructure analytics directly queried from the municipal database records.</p>
+      </div>
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Real Database Computed</span>
+      </div>
+    </div>
+
+    <!-- 5 KPI Summary Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Total Reported</span>
+        <h3 id="anTotal" class="text-3xl font-black text-slate-900">--</h3>
+        <p class="text-[10px] text-slate-400 mt-1">All complaints filed</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 block mb-1">Resolved Issues</span>
+        <h3 id="anResolved" class="text-3xl font-black text-emerald-600">--</h3>
+        <p class="text-[10px] text-emerald-500 mt-1">Proof photo recorded</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold uppercase tracking-wider text-blue-600 block mb-1">Resolution Rate</span>
+        <h3 id="anRate" class="text-3xl font-black text-blue-600">--%</h3>
+        <p class="text-[10px] text-blue-400 mt-1">Resolved vs Total</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-600 block mb-1">Avg. Resolution</span>
+        <h3 id="anAvgTime" class="text-3xl font-black text-amber-600">--</h3>
+        <p class="text-[10px] text-amber-500 mt-1">Days from report to fix</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold uppercase tracking-wider text-red-600 block mb-1">Overdue SLA</span>
+        <h3 id="anOverdue" class="text-3xl font-black text-red-600">--</h3>
+        <p class="text-[10px] text-red-400 mt-1">> 7 days resolution</p>
+      </div>
+
+    </div>
+
+    <!-- Charts Row 1: Category Doughnut + Status Pipeline Bar -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Category Doughnut -->
+      <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">Issues by Category</h3>
+            <p class="text-[11px] text-slate-400">Distribution of citizen complaints</p>
+          </div>
+          <i class="fa-solid fa-chart-pie text-slate-300"></i>
+        </div>
+        <div class="relative flex-1 min-h-[260px]">
+          <canvas id="chartCategory"></canvas>
+        </div>
+      </div>
+
+      <!-- Status Pipeline Bar -->
+      <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">Issues by Workflow Status</h3>
+            <p class="text-[11px] text-slate-400">Active status progression funnel</p>
+          </div>
+          <i class="fa-solid fa-bars-progress text-slate-300"></i>
+        </div>
+        <div class="relative flex-1 min-h-[260px]">
+          <canvas id="chartStatus"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Charts Row 2: Monthly Trends Area Line + Department Workload -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Monthly Trends -->
+      <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">Monthly Reporting & Resolution Trends</h3>
+            <p class="text-[11px] text-slate-400">Complaint velocity over the last 6 months</p>
+          </div>
+          <i class="fa-solid fa-chart-line text-slate-300"></i>
+        </div>
+        <div class="relative flex-1 min-h-[260px]">
+          <canvas id="chartTrends"></canvas>
+        </div>
+      </div>
+
+      <!-- Department Workloads -->
+      <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">Department Workload & Efficiency</h3>
+            <p class="text-[11px] text-slate-400">Resolved vs In-Progress vs Pending per Dept</p>
+          </div>
+          <i class="fa-solid fa-building-user text-slate-300"></i>
+        </div>
+        <div class="relative flex-1 min-h-[260px]">
+          <canvas id="chartDeptWorkload"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Charts Row 3: Average Resolution Time by Category -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm">Average Turnaround Time by Category (in Days)</h3>
+          <p class="text-[11px] text-slate-400">Calculated from creation timestamp to verified resolved timestamp</p>
+        </div>
+        <i class="fa-solid fa-stopwatch text-slate-300"></i>
+      </div>
+      <div class="relative h-64">
+        <canvas id="chartAvgTime"></canvas>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-auto bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 text-center">
+    <p>CivicFix Public Transparency Analytics • Powered by SQLite and Chart.js</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/analytics.js"></script>
+</body>
+</html>
