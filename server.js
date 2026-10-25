@@ -101,6 +101,20 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
   const method = req.method;
+  
+if (pathname === "/health" && method === "GET") {
+  res.writeHead(200, {
+    "Content-Type": "application/json"
+  });
+
+  res.end(JSON.stringify({
+    status: "ok",
+    service: "CivicFix backend"
+  }));
+
+  return;
+}
+
 
   // Handle CORS preflight
   if (method === 'OPTIONS') {
