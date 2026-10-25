@@ -10,7 +10,7 @@ const crypto = require('node:crypto');
 const { getDb, hashPassword } = require('./database');
 const { findPotentialDuplicates } = require('./duplicateDetector');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 const PUBLIC_DIR = __dirname;
 
 // MIME types for static asset serving
